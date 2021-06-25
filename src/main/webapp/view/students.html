@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách students</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <script type="text/javascript">
+        function addStudent() {
+            let name = $('#idname').val();
+            let age = $('#idage').val();
+            let address = $('#idaddress').val();
+            let email = $('#idemail').val();
+            let student = {
+                name: name,
+                age: age,
+                address: address,
+                email: email
+            };
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                type: "POST",
+                data: JSON.stringify(student),
+                url: "/Student",
+                success: success()
+            });
+            // Chặn event của thẻ
+            event.preventDefault();
+        }
+
+        function success() {
+            console.log("Yes vào success")
+            $.ajax({
+                type: "GET",
+                url: "/Student",
+                success: function (data) {
+                    console.log("danh sách ở đây: ", data)
+                    let count = '<tr>' +
+                        '<th>Name</th>' +
+                        '<th>Age</th>' +
+                        '<th>Address</th>' +
+                        '<th>Email</th>' +
+                        '<th colSpan="2">Action</th>' +
+                        '  </tr>';
+                    for (let i = 0; i < data.length; i++) {
+                        count += getStudent(data[i]);
+                    }
+                    document.getElementById('table_student').innerHTML = count;
+                }
+            });
+        }
+
+        function getStudent(students) {
+            return `<tr><td >${students.name}</td>`+
+`<td >${students.age}</td>`+
+`<td >${students.address}</td>`+
+`<td >${students.email}</td>` +
+                `<td><a  className="deleteStudent" onclick="deleteStudent()" href="${students.id}">Delete</a></td><td>`+
+`<a  className="updateStudent" href="${students.id}">Update</a></td>` +
+                `</tr>`;
+        }
+
+        // $(document).ready(function () {
+            function deleteStudent() {
+                let a = $(this);
+                let id = a.attr("href");
+                $.ajax({
+                    type: "DELETE",
+                    url: "/Student/" + id,
+                    success: function () {
+                        a.parent().parent().remove();
+                    }
+                });
+            }
+
+
+
+
+    </script>
+</head>
+<body>
+<form action="">
+    <input type="text" name="name" id="idname" placeholder="Name"><br>
+    <input type="number" name="age" id="idage" placeholder="Age"><br>
+    <input type="text" name="address" id="idaddress" placeholder="Address"><br>
+    <input type="text" name="email" id="idemail" placeholder="Email"><br>
+    <button type="submit" onclick="addStudent()">AddNew</button>
+</form>
+
+<br><br>
+<table border="1 solid" id="table_student">
+    <tr>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Address</th>
+        <th>Email</th>
+        <th colspan="2">Action</th>
+    </tr>
+
+    <th:block th:each="s:${s}">
+        <tr>
+            <td th:text="${s.name}"></td>
+            <td th:text="${s.age}"></td>
+            <td th:text="${s.address}"></td>
+            <td th:text="${s.email}"></td>
+            <td><a class="deleteStudent" onclick="deleteStudent()" th:href="${s.id}">Delete</a></td>
+            <td><a class="updateStudent" th:href="${s.id}">Update</a></td>
+        </tr>
+    </th:block>
+</table>
+
+
+</body>
+</html>
