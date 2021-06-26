@@ -3,7 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Danh sách students</title>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+
+    <style>
+
+
+    </style>
 
     <script type="text/javascript">
         function addStudent() {
@@ -22,67 +38,83 @@
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                 },
-                type: "POST",
+                type: `POST`,
                 data: JSON.stringify(student),
                 url: "/Student",
-                success: success()
+                success: success
             });
-            // Chặn event của thẻ
             event.preventDefault();
         }
 
         function success() {
-            console.log("Yes vào success")
             $.ajax({
                 type: "GET",
                 url: "/Student",
                 success: function (data) {
-                    console.log("danh sách ở đây: ", data)
-                    let count = '<tr>' +
+                    let content = '<tr>' +
                         '<th>Name</th>' +
                         '<th>Age</th>' +
                         '<th>Address</th>' +
                         '<th>Email</th>' +
-                        '<th colSpan="2">Action</th>' +
-                        '  </tr>';
+                        '<th>Action</th>' +
+                        '</tr>';
+
                     for (let i = 0; i < data.length; i++) {
-                        count += getStudent(data[i]);
+                        content += getStudent(data[i]);
                     }
-                    document.getElementById('table_student').innerHTML = count;
+                    document.getElementById('table_student').innerHTML = content;
                 }
             });
+
         }
 
-        function getStudent(students) {
-            return `<tr><td >${students.name}</td>`+
-`<td >${students.age}</td>`+
-`<td >${students.address}</td>`+
-`<td >${students.email}</td>` +
-                `<td><a  className="deleteStudent" onclick="deleteStudent()" href="${students.id}">Delete</a></td><td>`+
-`<a  className="updateStudent" href="${students.id}">Update</a></td>` +
+        function getStudent(s) {
+            return `<tr>` +
+                `<td th:text="">${s.name}</td>` +
+                `<td th:text="">${s.age}</td>` +
+                `<td th:text="">${s.address}</td>` +
+                `<td th:text="">${s.email}</td>` +
+                `<td>` +
+                `<button type="submit" className="deleteStudent" value="${s.id}" >Delete</button>` +
+                `</td>` +
                 `</tr>`;
         }
 
-        // $(document).ready(function () {
-            function deleteStudent() {
+
+        $(document).ready(function () {
+            $('.deleteStudent').click(function (event) {
                 let a = $(this);
-                let id = a.attr("href");
+                let id = a.attr('value');
                 $.ajax({
                     type: "DELETE",
-                    url: "/Student/" + id,
+                    url: `/Student/${id}`,
                     success: function () {
                         a.parent().parent().remove();
                     }
+
                 });
-            }
+                event.preventDefault();
+            });
+        })
+
+        function searchStudent(){
+        //    lấy thông tin
+            let name = $('#name-search').val();
 
 
-
+        }
 
     </script>
+
 </head>
 <body>
-<form action="">
+<br>
+<div >
+    <input type="search" id="name-search" placeholder="Search..">
+    <button type="button" onclick="searchStudent()">Search</button>
+</div>
+<br><br>
+<form action="" method="post">
     <input type="text" name="name" id="idname" placeholder="Name"><br>
     <input type="number" name="age" id="idage" placeholder="Age"><br>
     <input type="text" name="address" id="idaddress" placeholder="Address"><br>
@@ -97,7 +129,7 @@
         <th>Age</th>
         <th>Address</th>
         <th>Email</th>
-        <th colspan="2">Action</th>
+        <th>Action</th>
     </tr>
 
     <th:block th:each="s:${s}">
@@ -106,8 +138,9 @@
             <td th:text="${s.age}"></td>
             <td th:text="${s.address}"></td>
             <td th:text="${s.email}"></td>
-            <td><a class="deleteStudent" onclick="deleteStudent()" th:href="${s.id}">Delete</a></td>
-            <td><a class="updateStudent" th:href="${s.id}">Update</a></td>
+            <td>
+                <button type="submit" class="deleteStudent" th:id="${s.id}" th:value="${s.id}">Delete</button>
+            </td>
         </tr>
     </th:block>
 </table>
